@@ -1,0 +1,69 @@
+"use strict";
+
+const CACHE_VERSION = 'v0'; // Incrementar a versão sempre que houver alterações
+const CACHE_NAME = `cashmalipay-${CACHE_VERSION}`;
+const OFFLINE_URL = '/offline.html';
+
+const filesToCache = [
+    OFFLINE_URL
+];
+
+self.addEventListener("install", (event) => {
+    event.waitUntil(
+        caches.open(CACHE_NAME)
+            .then((cache) => cache.addAll(filesToCache))
+    );
+});
+
+self.addEventListener("fetch", (event) => {
+    if (event.request.mode === 'navigate') {
+        event.respondWith(
+            fetch(event.request)
+                .catch(() => {
+                    return caches.match(OFFLINE_URL);
+                })
+        );
+    } else {
+        event.respondWith(
+            caches.match(event.request)
+                .then((response) => {
+                    return response || fetch(event.request);
+                })
+        );
+    }
+});
+
+self.addEventListener('activate', (event) => {
+    event.waitUntil(
+        caches.keys().then((cacheNames) => {
+            return Promise.all(
+                cacheNames.map((cacheName) => {
+                    if (cacheName !== CACHE_NAME) {
+                        return caches.delete(cacheName);
+                    }
+                })
+            );
+        })
+    );
+});
+
+// Adicionando o evento push
+self.addEventListener('push', function(event) {
+    const options = {
+        body: event.data ? event.data.text() : 'Nova Notificação!',
+        icon: '/assets/images/96x96.png',
+        badge: '/assets/images/96x96.png'
+    };
+
+    event.waitUntil(
+        self.registration.showNotification('Notificação PWA', options)
+    );
+});
+
+// Lidar com clique na notificação
+self.addEventListener('notificationclick', function(event) {
+    event.notification.close();
+    event.waitUntil(
+        clients.openWindow('/') // Defina a URL que deseja abrir ao clicar na notificação
+    );
+});
