@@ -70,6 +70,32 @@ class PwaPublishCommand extends Command
         ]);
         $this->info('logo is published ✔');
 
+        // Step 7: Publish the WebPush migrations
+        $this->call('vendor:publish', [
+            '--provider' => 'NotificationChannels\WebPush\WebPushServiceProvider',
+            '--tag' => 'migrations',
+            '--force' => true,
+        ]);
+        $this->info('Notification is published ✔');
+
+        // Step 8: migrate
+        $this->call('migrate', [
+            '--force' => true, // Opcional: força a execução sem confirmação
+        ]);
+
+        // Step 9: Publish the WebPush config
+        $this->call('vendor:publish', [
+            '--provider' => 'NotificationChannels\WebPush\WebPushServiceProvider',
+            '--tag' => 'config',
+            '--force' => true,
+        ]);
+        $this->info('Config WebPush is published ✔');
+
+        // Step 10: VAPID Generate
+        $this->call('webpush:vapid');
+        $this->info('key VAPID generated ✔');
+
+
         $this->info('Greeting!.. Enjoy Laravel PWA 🎉');
 
     }

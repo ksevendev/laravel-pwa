@@ -33,70 +33,84 @@ class PWAService
         $vapidPublic = config('pwa.vapid_public');
         $iconButton = e(asset('/assets/images/app.png'));
         $installButton = config('pwa.install-button', false);
-
+    
         $installApp = self::getInstallAppHtml($installButton, $iconButton);
         $installButtonJs = $installButton ? self::installButtonJs() : '';
-
+    
         return <<<HTML
-        {$installApp}
-        <!-- PWA scripts -->
-        <script src="{$swPath}" defer></script>
-        <script>
-            // Verificar se o navegador suporta Service Worker e Push Manager
-            if ('serviceWorker' in navigator && 'PushManager' in window) {
-                navigator.serviceWorker.register('{$swPath}').then(registration => {
-                    console.log('Service Worker registrado com sucesso:', registration);
-                    
-                    Notification.requestPermission().then(permission => {
-                        if (permission === 'granted') {
-                            subscribeUserToPush(registration);
-                        } else {
-                            console.log('Permissão para notificações negada');
+            {$installApp}
+            <!-- PWA scripts -->
+            <script src="{$swPath}" defer></script>
+            <script>
+                
+    
+                // Verificar se o navegador suporta Service Worker e Push Manager
+                if ('serviceWorker' in navigator && 'PushManager' in window) {
+                    navigator.serviceWorker.register('{$swPath}').then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                        const vapidPublicKey = '{$vapidPublic}';
+                        if (vapidPublicKey) {
+                            Notification.requestPermission().then(permission => {
+                                if (permission === 'granted') {
+                                    subscribeUserToPush(registration);
+                                } else {
+                                    console.log('Permissão para notificações negada');
+                                }
+                            });
                         }
-                    });
-                }).catch(error => console.error('Erro ao registrar o Service Worker:', error));
-            }
-
-            const vapidPublicKey = '{$vapidPublic}';
-            if (vapidPublicKey) {
-                function subscribeUserToPush(registration) {
-                    const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
-                    registration.pushManager.subscribe({
-                        userVisibleOnly: true,
-                        applicationServerKey: convertedVapidKey
-                    }).then(subscription => {
-                        sendSubscriptionToBackend(subscription);
-                    }).catch(error => console.error('Falha ao se inscrever para notificações push:', error));
+                    }).catch(error => console.error('Erro ao registrar o Service Worker:', error));
+                }
+    
+                const vapidPublicKey = '{$vapidPublic}';
+    
+                if (vapidPublicKey) {
+                    function subscribeUserToPush(registration) {
+                        const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
+                        registration.pushManager.subscribe({
+                            userVisibleOnly: true,
+                            applicationServerKey: convertedVapidKey
+                        }).then(subscription => {
+                            sendSubscriptionToBackend(subscription);
+                        }).catch(error => console.error('Falha ao se inscrever para notificações push:', error));
+                    }
+                    
+                    function sendSubscriptionToBackend(subscription) {
+                        fetch('/api/subscribe', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({subscription})
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                console.log('Inscrição enviada com sucesso:', data);
+                            } else {
+                                console.error('Erro ao enviar inscrição:', data);
+                            }
+                        })
+                        .catch(error => console.error('Erro ao enviar inscrição:', error));
+                    }
+    
+                    function urlBase64ToUint8Array(base64String) {
+                        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+                        const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+                        const rawData = window.atob(base64);
+                        const outputArray = new Uint8Array(rawData.length);
+                        for (let i = 0; i < rawData.length; ++i) {
+                            outputArray[i] = rawData.charCodeAt(i);
+                        }
+                        return outputArray;
+                    }
                 }
                 
-                function sendSubscriptionToBackend(subscription) {
-                    fetch('/api/subscribe', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({subscription})
-                    })
-                    .then(response => response.json())
-                    .then(data => console.log('Inscrição enviada:', data))
-                    .catch(error => console.error('Erro ao enviar inscrição:', error));
-                }
-
-                function urlBase64ToUint8Array(base64String) {
-                    const padding = '='.repeat((4 - base64String.length % 4) % 4);
-                    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-                    const rawData = window.atob(base64);
-                    const outputArray = new Uint8Array(rawData.length);
-                    for (let i = 0; i < rawData.length; ++i) {
-                        outputArray[i] = rawData.charCodeAt(i);
-                    }
-                    return outputArray;
-                }
-            }
-            
-            {$installButtonJs}
-        </script>
-        <!-- PWA scripts -->
+                {$installButtonJs}
+            </script>
+            <!-- PWA scripts -->
         HTML;
-    }
+    }    
 
     private static function getInstallButtonStyle(bool $installButton): string
     {
