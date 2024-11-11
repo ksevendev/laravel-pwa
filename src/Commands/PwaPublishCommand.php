@@ -25,6 +25,9 @@ class PwaPublishCommand extends Command
      */
     public function handle(): void
     {
+        // Step 0: intro
+        $this->info('KSeven PWA for Laravel.');
+
         // Step 1: Publish the pwa-config
         $this->call('vendor:publish', [
             '--tag' => 'ks:publish-pwa-config',
@@ -53,7 +56,14 @@ class PwaPublishCommand extends Command
         ]);
         $this->info('sw.js file is published ✔');
 
-        // Step 5: Publish the logo
+        // Step 5: Publish the sw js
+        $this->call('vendor:publish', [
+            '--tag' => 'ks:publish-notification',
+            '--force' => true,
+        ]);
+        $this->info('notification.js file is published ✔');
+
+        // Step 6: Publish the logo
         $this->call('vendor:publish', [
             '--tag' => 'ks:publish-logo',
             '--force' => true,

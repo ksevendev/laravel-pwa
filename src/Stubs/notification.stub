@@ -1,0 +1,25 @@
+"use strict";
+
+document.getElementById('enableNotifications').addEventListener('click', () => {
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+        Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+                navigator.serviceWorker.ready.then(registration => {
+                    registration.pushManager.subscribe({
+                        userVisibleOnly: true,
+                        applicationServerKey: 'SUA_VAPID_PUBLIC_KEY_AQUI'
+                    }).then(subscription => {
+                        fetch('/api/subscribe', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({ subscription })
+                        });
+                    });
+                });
+            }
+        });
+    }
+});

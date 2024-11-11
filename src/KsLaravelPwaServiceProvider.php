@@ -41,6 +41,10 @@ class KsLaravelPwaServiceProvider extends ServiceProvider
         ], 'ks:publish-sw');
 
         $this->publishes([
+            __DIR__.'/Stubs/notification.stub' => asset('assets/notification.js'),
+        ], 'ks:publish-notification');
+
+        $this->publishes([
             __DIR__.'/Stubs/logo.png' => asset('assets/logo.png'),
         ], 'ks:publish-logo');
 

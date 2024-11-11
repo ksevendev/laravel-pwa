@@ -1,34 +1,25 @@
 "use strict";
 
-const CACHE_VERSION = 'v0'; // Incrementar a versão sempre que houver alterações
-const CACHE_NAME = `kseven-${CACHE_VERSION}`;
+const CACHE_VERSION = 'v0';
+const CACHE_NAME = `cashmalipay-${CACHE_VERSION}`;
 const OFFLINE_URL = '/offline.html';
 
-const filesToCache = [
-    OFFLINE_URL
-];
+const filesToCache = [OFFLINE_URL];
 
 self.addEventListener("install", (event) => {
     event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then((cache) => cache.addAll(filesToCache))
+        caches.open(CACHE_NAME).then((cache) => cache.addAll(filesToCache))
     );
 });
 
 self.addEventListener("fetch", (event) => {
     if (event.request.mode === 'navigate') {
         event.respondWith(
-            fetch(event.request)
-                .catch(() => {
-                    return caches.match(OFFLINE_URL);
-                })
+            fetch(event.request).catch(() => caches.match(OFFLINE_URL))
         );
     } else {
         event.respondWith(
-            caches.match(event.request)
-                .then((response) => {
-                    return response || fetch(event.request);
-                })
+            caches.match(event.request).then((response) => response || fetch(event.request))
         );
     }
 });
@@ -47,23 +38,35 @@ self.addEventListener('activate', (event) => {
     );
 });
 
-// Adicionando o evento push
-self.addEventListener('push', function(event) {
+// Notificações Push
+self.addEventListener('push', (event) => {
+    const data = event.data ? event.data.json() : {};
+    const title = data.title || 'Nova Notificação';
     const options = {
-        body: event.data ? event.data.text() : 'Nova Notificação!',
-        icon: '/assets/images/96x96.png',
-        badge: '/assets/images/96x96.png'
+        body: data.body || 'Você tem uma nova mensagem',
+        icon: data.icon || '/assets/images/96x96.png',
+        data: data.url || '/'
     };
 
     event.waitUntil(
-        self.registration.showNotification('Notificação PWA', options)
+        self.registration.showNotification(title, options)
     );
 });
 
-// Lidar com clique na notificação
-self.addEventListener('notificationclick', function(event) {
+// Abrir URL ao clicar na notificação
+self.addEventListener('notificationclick', (event) => {
     event.notification.close();
+    const urlToOpen = new URL(event.notification.data, self.location.origin).href;
     event.waitUntil(
-        clients.openWindow('/') // Defina a URL que deseja abrir ao clicar na notificação
+        clients.matchAll({ type: 'window' }).then((windowClients) => {
+            for (const client of windowClients) {
+                if (client.url === urlToOpen && 'focus' in client) {
+                    return client.focus();
+                }
+            }
+            if (clients.openWindow) {
+                return clients.openWindow(urlToOpen);
+            }
+        })
     );
 });
