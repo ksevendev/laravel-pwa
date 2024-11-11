@@ -29,23 +29,23 @@ class KsLaravelPwaServiceProvider extends ServiceProvider
         ], 'ks:publish-pwa-config');
 
         $this->publishes([
-            __DIR__.'/Stubs/manifest.stub' => asset('assets/manifest.json'),
+            __DIR__.'/Stubs/manifest.stub' => base_path('assets/manifest.json'),
         ], 'ks:publish-manifest');
 
         $this->publishes([
-            __DIR__.'/Stubs/offline.stub' => asset('assets/offline.html'),
+            __DIR__.'/Stubs/offline.stub' => base_path('assets/offline.html'),
         ], 'ks:publish-offline');
 
         $this->publishes([
-            __DIR__.'/Stubs/sw.stub' => asset('assets/sw.js'),
+            __DIR__.'/Stubs/sw.stub' => base_path('assets/sw.js'),
         ], 'ks:publish-sw');
 
         $this->publishes([
-            __DIR__.'/Stubs/notification.stub' => asset('assets/notification.js'),
+            __DIR__.'/Stubs/notification.stub' => base_path('assets/notification.js'),
         ], 'ks:publish-notification');
 
         $this->publishes([
-            __DIR__.'/Stubs/logo.png' => asset('assets/logo.png'),
+            __DIR__.'/Stubs/logo.png' => base_path('assets/logo.png'),
         ], 'ks:publish-logo');
 
     }

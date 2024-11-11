@@ -3,6 +3,7 @@
 namespace KsLaravelPwa\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Schema;
 
 class PwaPublishCommand extends Command
 {
@@ -79,9 +80,12 @@ class PwaPublishCommand extends Command
         $this->info('Notification is published ✔');
 
         // Step 8: migrate
-        $this->call('migrate', [
-            '--force' => true, // Opcional: força a execução sem confirmação
-        ]);
+        if (!Schema::hasTable('users')) {
+            // Se a tabela não existir, executa a migração
+            $this->call('migrate', [
+                '--force' => true, 
+            ]);
+        }
 
         // Step 9: Publish the WebPush config
         $this->call('vendor:publish', [
