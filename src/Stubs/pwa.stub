@@ -84,26 +84,13 @@ return [
                 "form_factor" => "wide"
             ]
         ],
-        "categories" => ["finance", "business", "productivity"],
+        "categories" => ["general"],
         "shortcuts" => [
             [
-                "name" => "Cash Malipay",
-                "short_name" => "Cash Malipay",
-                "description" => "Iniciar uma nova venda rapidamente",
+                "name" => "KSeven",
+                "short_name" => "KSeven",
+                "description" => "Seu desenvolvedor...",
                 "url" => "/",
-                "icons" => [
-                    [
-                        "src" => "/assets/images/96x96.png",
-                        "sizes" => "96x96",
-                        "type" => "image/png"
-                    ]
-                ]
-            ],
-            [
-                "name" => "Cash Malipay - Painel do Usuário",
-                "short_name" => "Cash Malipay - Painel do Usuário",
-                "description" => "Acesse o painel de usuário",
-                "url" => "/user/",
                 "icons" => [
                     [
                         "src" => "/assets/images/96x96.png",
@@ -116,11 +103,11 @@ return [
         "related_applications" => [
             [
                 "platform" => "webapp",
-                "url" => "https://cashmalipay.com.br/"
+                "url" => "https://kseven.com.br/"
             ],
             [
                 "platform" => "play",
-                "id" => "com.malipay.app"
+                "id" => "com.kseven.app"
             ]
         ],
         "prefer_related_applications" => false,

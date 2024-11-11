@@ -1,7 +1,7 @@
 "use strict";
 
 const CACHE_VERSION = 'v0'; // Incrementar a versão sempre que houver alterações
-const CACHE_NAME = `cashmalipay-${CACHE_VERSION}`;
+const CACHE_NAME = `kseven-${CACHE_VERSION}`;
 const OFFLINE_URL = '/offline.html';
 
 const filesToCache = [
