@@ -1,0 +1,13 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+
+Route::namespace('KsLaravelPwa\Http\Controllers')->name('notification.')->group(function(){
+    Route::controller('PushSubscriptionController')->name('push.')->group(function(){
+        Route::post('push/store', 'store')->name('store');
+        Route::post('push/destroy', 'destroy')->name('destroy');
+    });
+    Route::controller('SubscriptionController')->group(function(){
+        Route::post('subscribe', 'subscribe')->name('subscribe');
+    });
+});
